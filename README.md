@@ -1,33 +1,51 @@
 # Adobe Hackathon - Round 1A Submission
 
-## 🧠 Challenge
-Build a system that extracts structured outlines from PDFs, including:
+## 🧠 Challenge Overview
 
-- Title
-- Headings: H1, H2, H3
-- With level and page number
-- Output format: JSON
+Build a system that extracts structured outlines from PDF documents including:
 
-## 🛠️ Approach
+- Document title
+- Headings with levels (H1, H2, H3)
+- Page numbers for each heading
+- Output format: structured JSON
 
-We used a combination of layout-based PDF parsing (`pdfplumber` / `PyMuPDF`) and heuristics such as font size, font weight, and text position to identify heading levels. The script processes each page and classifies headings based on relative features.
+The solution must work fully offline, complete within 60 seconds for 3–5 documents, and consume ≤1GB RAM using only CPU.
 
-### Steps:
-1. Load and parse the PDF
-2. Identify potential headings using text attributes
-3. Assign levels: H1, H2, H3 using custom logic
-4. Output a clean JSON file per input
+---
 
-## 🧰 Libraries Used
+## 💡 Approach
 
-- `PyMuPDF` (fitz) – PDF text and layout extraction
-- `pdfplumber` – for additional page-level parsing
-- `re`, `json`, `os` – for processing
+We developed a layout-aware and font-sensitive PDF processor using `PyMuPDF` and optionally `pdfplumber`. The method relies on visual and structural cues (font size, boldness, positioning) to classify text elements into heading levels.
 
-> ⚠️ No external API or internet calls used. The solution is fully offline and meets size/runtime constraints.
+### Key Steps:
 
-## 🐳 How to Build & Run (Offline)
+1. **Load PDF**: Open using `PyMuPDF` (`fitz`) for lightweight access to text and layout.
+2. **Text Extraction**: Extract text blocks and metadata like font size, flags (bold), and coordinates.
+3. **Heading Detection**:
+   - Classify headings based on relative font size and boldness.
+   - Use positional heuristics (e.g. left-aligned, top of page).
+   - Dynamically infer H1, H2, H3 using most frequent size groups.
+4. **Structuring Output**:
+   - Each heading includes: text, heading level (H1–H3), and page number.
+   - JSON output format for integration into downstream systems.
 
-### Build the Docker image:
+---
+
+## 📦 Models & Libraries Used
+
+| Library       | Purpose                                |
+|---------------|----------------------------------------|
+| `PyMuPDF`     | Primary PDF text + layout extraction   |
+| `pdfplumber`  | (Optional) Additional structural parsing |
+| `json`        | For output formatting                  |
+| `re`, `os`    | Utility + regex pattern detection      |
+
+> ❌ No ML models used — fully rule-based to stay within memory and offline constraints.
+
+---
+
+## 🐳 How to Build & Run (Offline Mode)
+
+### Build Docker Image
 ```bash
-docker build --platform linux/amd64 -t adobe-solution:latest .
+docker build -t adobe-outline-extractor .
